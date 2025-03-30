@@ -15,24 +15,26 @@
  
 #define FILENAME "antenas.txt"
 
-int main() {
-    Antena *listaAntenas = NULL;
-    Efeito *listaEfeitos = NULL;
-
+    int main() {
+        Antena* listaAntenas = NULL;
+        Efeito* listaEfeitos = NULL;
     
-    listaAntenas = CarregarAntenas(listaAntenas, FILENAME);
+        
+        listaAntenas = InserirAntenaInicio(listaAntenas, 'A', 0, 3);
+        listaAntenas = InserirAntenaInicio(listaAntenas, 'A', 4, 1);
+        listaAntenas = InserirAntenaInicio(listaAntenas, 'A', 5, 5);
     
-    MostrarAntenas(listaAntenas);
+    
+        listaEfeitos = DetetarEfeito(listaAntenas, listaEfeitos);
+    
+        MostrarAntenas(listaAntenas);
+        printf("----------------------------\n");
+        MostrarAntenasEEfeito(listaAntenas, listaEfeitos);
 
-
-    listaEfeitos = DetetarEfeito(listaAntenas, listaEfeitos);
-
-    MostrarAntenasEEfeito(listaAntenas, listaEfeitos);
-
-    ListarAntenasEfeito(listaAntenas, listaEfeitos);
-
-    LimparListaAntenas(listaAntenas);
-    LimparListaEfeitos(listaEfeitos);
-
-    return 0;
-}
+        ListarAntenasEfeito(listaAntenas, listaEfeitos);
+    
+        LimparListaAntenas(listaAntenas);
+        LimparListaEfeitos(listaEfeitos);
+    
+        return 0;
+    }

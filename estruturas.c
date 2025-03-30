@@ -29,7 +29,6 @@
 
    FILE* file = fopen(filename,"r");
    if(!file){
-   printf("Erro ao abrir o arquivo\n");
    return listalig;
    }
    char linha[100];
@@ -110,13 +109,16 @@ Antena* RemoverAntena(Antena* listalig, int x, int y){
 
 Efeito* DetetarEfeito(Antena* listalig, Efeito* locefeito){
 
-   for(Antena* a1 = listalig; a1 != NULL; a1= a1->prox){          //          percorre a lista ligada
-      for(Antena* a2 = listalig; a2 != NULL; a2= a2->prox){       //             ...
-         if(a1->frequencia==a2->frequencia){                      // caso a frequencia de duas antenas seja igual é adicionado o efeito nefasto
+   for(Antena* a1 = listalig; a1 != NULL; a1 = a1->prox){          //          percorre a lista ligada
+      for(Antena* a2 = a1->prox; a2 != NULL; a2 = a2->prox){       //             ...
+         if(a1->frequencia == a2->frequencia){                      // caso a frequencia de duas antenas seja igual é adicionado o efeito nefasto
                                 
+            if (a1->x == a2->x || a1->y == a2->y){
             locefeito = AdicionarEfeito(locefeito, 2 * a2->x - a1->x, 2 * a2->y - a1->y);                 // efeito nefasto adicionado para um dos lados
             locefeito = AdicionarEfeito(locefeito, 2 * a1->x - a2->x, 2 * a1->y - a2->y);                 // efeito nefasto adicionado para um dos lados
-      }
+            }   
+        }
+
    }
 }
       return locefeito;
@@ -125,19 +127,24 @@ Efeito* DetetarEfeito(Antena* listalig, Efeito* locefeito){
 Efeito* AdicionarEfeito(Efeito* listaligne, int x, int y) {          // função com o mesmo conceito que a função CriarAntena, só que é utilizada como auxiliar para a função DetetarEfeito
    
     Efeito* temp = listaligne;
-    while(temp){
+    while(temp != NULL){
         if(temp->x == x && temp->y == y){               //caso o efeito já exista, não é adicionado
             return listaligne;
         }
         temp = temp->prox;
-    }
+    
 
     Efeito *nova = (Efeito*)malloc(sizeof(Efeito));
+
+    if(nova == NULL){
+    return listaligne;
+}
 
    nova->x = x;
    nova->y = y;
    nova->prox = listaligne;
    return nova;
+}
 }
 
 Antena* ModificarAntena(Antena *listalig, int x, int y, char novafrequencia, int novax, int novay){
@@ -162,8 +169,8 @@ Antena* ModificarAntena(Antena *listalig, int x, int y, char novafrequencia, int
 
 void MostrarAntenas(Antena* listalig){
 
-    for (int i = 0; i < 5; i++) {               // percorre as linhas do mapa
-        for (int j = 0; j < 8; j++) {           // percorre as colunas do mapa
+    for (int i = 0; i < 15; i++) {               // percorre as linhas do mapa
+        for (int j = 0; j < 15; j++) {           // percorre as colunas do mapa
             Antena *atual = listalig;
             char ponto = '.'; 
 
@@ -183,10 +190,11 @@ void MostrarAntenas(Antena* listalig){
 
 void MostrarAntenasEEfeito(Antena* listalig, Efeito* listaligne){
 
-    for (int i = 0; i < 5; i++) {               // percorre as linhas do mapa
-        for (int j = 0; j < 8; j++) {           // percorre as colunas do mapa
-            Antena *atual = listalig;
+    for (int i = 0; i < 15; i++) {               // percorre as linhas do mapa
+        for (int j = 0; j < 15; j++) {           // percorre as colunas do mapa
+            
             char ponto = '.'; 
+            Antena *atual = listalig;
 
             while (atual != NULL) {                     // percorre a lista ligada
                 if (atual->x == j && atual->y == i) {   // procura as coordenandas de cada antena na lista ligada
@@ -196,28 +204,23 @@ void MostrarAntenasEEfeito(Antena* listalig, Efeito* listaligne){
                 atual = atual->prox;
             }
 
-            printf("%c", ponto);
-        }
-        printf("\n");
-    }
-
-    for (int i = 0; i < 5; i++) {               // percorre as linhas do mapa
-        for (int j = 0; j < 8; j++) {           // percorre as colunas do mapa
-            Efeito *atual = listaligne;
-            char ponto = '.'; 
-
-            while (atual != NULL) {                     // percorre a lista ligada
-                if (atual->x == j && atual->y == i) {   // procura as coordenandas de cada antena na lista ligada
-                    ponto = '#';          // troca o ponto pelo carater que representa o local onde existe efeito nefasto entre duas antenas
-                    break;
+            if (ponto == '.') {                 // Se não houver antena, verifica efeitos
+                Efeito* atuale = listaligne;
+                while (atuale != NULL) {
+                    if (atuale->x == j && atuale->y == i) {
+                        ponto = '#';           // Mostra efeito nefasto como '#'
+                        break;
+                    }
+                    atuale = atuale->prox;
                 }
-                atual = atual->prox;
             }
 
+
             printf("%c", ponto);
         }
         printf("\n");
     }
+
 }
 
 void LimparListaAntenas(Antena* listalig){
@@ -245,26 +248,25 @@ void LimparListaEfeitos(Efeito* listaligne){
 }
 
 void ListarAntenasEfeito(Antena* listalig, Efeito* listaligne) {
-    printf("|------------+------------+------------+------------+------------+\n");
+    printf("|------------+------------+------------+------------+------------|\n");
     printf("| Frequência |     X      |     Y      | Loc. Nef X | Loc. Nef Y |\n");
-    printf("|------------+------------+------------+------------+------------+\n");
+    printf("|------------+------------+------------+------------+------------|\n");
 
-    Antena* antena = listalig;
-    Efeito* nefasto = listaligne;
+    while (listalig != NULL || listaligne != NULL) {                                            // enquanto existam antenas ou efeitos nefasto
+        if (listalig != NULL) {
+            printf("|     %c      |     %d      |     %d      ", listalig->frequencia, listalig->x, listalig->y);           // imprime as antenas existentes
+            listalig = listalig->prox;
+        } else {
+            printf("|     -      |     -      |     -      ");                                                  // caso nao existam preenche os espacos a branco neste caso com um "-"
+        }
 
-    while (antena != NULL || nefasto != NULL) {
-        if (antena != NULL && nefasto != NULL) {
-            printf("| %c | %d | %d | %d | %d |\n", antena->frequencia, antena->x, antena->y, nefasto->x, nefasto->y);
-            antena = antena->prox;
-            nefasto = nefasto->prox;
-        } else if (antena != NULL) { // Só tem antenas restantes
-            printf("| %c | %d | %d | - | - |\n", antena->frequencia, antena->x, antena->y);
-            antena = antena->prox;
-        } else { // Só tem locais nefastos restantes
-            printf("| - | - | - | %d | %d |\n", nefasto->x, nefasto->y);
-            nefasto = nefasto->prox;
+        if (listaligne != NULL) {                                                                       
+            printf("|     %d      |     %d      |\n", listaligne->x, listaligne->y);                        // imprime os efeitos existentes
+            listaligne = listaligne->prox;
+        } else {
+            printf("|     -      |     -      |\n");                                                        // caso estes nao existam tal como as antenas....
         }
     }
 
-    printf("+------------+------------+------------+------------+------------+\n");
+    printf("|------------+------------+------------+------------+------------|\n");
 }
